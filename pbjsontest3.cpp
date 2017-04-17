@@ -49,23 +49,6 @@ void ChooseMessageToJson(std::string& pb2jsonstring, const ::google::protobuf::M
                 tmp_string.append("]"); 
                 judge = AppendTmpString1(pb2jsonstring,tmp_string,judge); 
 
-                //  
-                // tmp_string.clear();
-                // GetRepeatedJson(tmp_string, msg, goal_field, reflection, Enum_2_Str);             
-                // if ( judge!=0 && tmp_string.length()!=0)
-                // {
-                //     pb2jsonstring.append(",").append("\"").append(goal_field->name()).append("\":").append("[");
-                //     pb2jsonstring.append(tmp_string);
-                // }
-                // else if(judge==0 && tmp_string.length()!=0)
-                // {
-                //     pb2jsonstring.append("\"").append(goal_field->name()).append("\":").append("[");
-                //     pb2jsonstring.append(tmp_string);
-                //     // GetRepeatedJson(pb2jsonstring, msg, goal_field, reflection, Enum_2_Str);
-                //     judge=1;
-                // }
-                // pb2jsonstring.append("]");
-                //
             }
             continue;  
         }
@@ -88,25 +71,6 @@ void ChooseMessageToJson(std::string& pb2jsonstring, const ::google::protobuf::M
                     ChooseMessageToJson(tmp_string,tmp_msg, NEED, Enum_2_Str);
                     judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);
 
-
-                    //                    
-                    // std::set<uint> NEED;
-                    // tmp_string.clear();
-                    // ChooseMessageToJson(tmp_string,tmp_msg, NEED, Enum_2_Str);
-                    // if ( judge!=0 && tmp_string.length()!=0)
-                    // {
-                    //     pb2jsonstring.append(",").append("\"").append(goal_field->name()).append("\":");
-                    //     pb2jsonstring.append(tmp_string);
-                                                
-                    // }
-                    // else if(judge==0 && tmp_string.length()!=0)
-                    // {
-                    //     pb2jsonstring.append("\"").append(goal_field->name()).append("\":");
-                    //     pb2jsonstring.append(tmp_string);
-                    //     judge=1;
-                    // }
-                    //
-
                 }  
             }  
             break;  
@@ -119,22 +83,6 @@ void ChooseMessageToJson(std::string& pb2jsonstring, const ::google::protobuf::M
                 judge = AppendTmpString1(pb2jsonstring,tmp_string,judge); 
 
 
-                //
-                // tmp_string.clear();
-                // tmp_string.append(std::to_string(reflection->GetInt32(msg, goal_field)));
-                // if ( judge!=0 && tmp_string.length()!=0)
-                // {
-                //     pb2jsonstring.append(",").append("\"").append(goal_field->name()).append("\":");
-                //     pb2jsonstring.append(tmp_string);   
-                // }
-                // else if(judge==0 && tmp_string.length()!=0)
-                // {
-                //     pb2jsonstring.append("\"").append(goal_field->name()).append("\":");
-                //     pb2jsonstring.append(tmp_string); 
-                //     judge=1;
-                // }
-
-                //        
 
             }
             break;  
@@ -146,23 +94,6 @@ void ChooseMessageToJson(std::string& pb2jsonstring, const ::google::protobuf::M
                 tmp_string.append(std::to_string(reflection->GetUInt32(msg, goal_field)));  
                 judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);  
 
-                //
-                
-                // tmp_string.clear();
-                // tmp_string.append(std::to_string(reflection->GetUInt32(msg, goal_field)));
-                // if ( judge!=0 && tmp_string.length()!=0)
-                // {
-                //     pb2jsonstring.append(",").append("\"").append(goal_field->name()).append("\":");
-                //     pb2jsonstring.append(tmp_string);   
-                // }
-                // else if(judge==0 && tmp_string.length()!=0)
-                // {
-                //     pb2jsonstring.append("\"").append(goal_field->name()).append("\":");
-                //     pb2jsonstring.append(tmp_string); 
-                //     judge=1;
-                // }
-
-                //        
        
 	         }
             break;  
@@ -174,23 +105,6 @@ void ChooseMessageToJson(std::string& pb2jsonstring, const ::google::protobuf::M
                 tmp_string.append(std::to_string(reflection->GetInt64(msg, goal_field)));
                 judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);
 
-                //
-                // tmp_string.clear();
-                // tmp_string.append(std::to_string(reflection->GetInt64(msg, goal_field)));
-                // if ( judge!=0 && tmp_string.length()!=0)
-                // {
-                //     pb2jsonstring.append(",").append("\"").append(goal_field->name()).append("\":");
-                //     pb2jsonstring.append(tmp_string);   
-                // }
-                // else if(judge==0 && tmp_string.length()!=0)
-                // {
-                //     pb2jsonstring.append("\"").append(goal_field->name()).append("\":");
-                //     pb2jsonstring.append(tmp_string); 
-                //     judge=1;
-                // }
-
-                //        
-
  
 	         } 
             break;  
@@ -201,21 +115,6 @@ void ChooseMessageToJson(std::string& pb2jsonstring, const ::google::protobuf::M
                 tmp_string.append(std::to_string(reflection->GetUInt64(msg, goal_field)));
                 judge = AppendTmpString1(pb2jsonstring,tmp_string,judge); 
 
-                // //
-                // tmp_string.clear();
-                // tmp_string.append(std::to_string(reflection->GetUInt64(msg, goal_field)));
-                // if ( judge!=0 && tmp_string.length()!=0)
-                // {
-                //     pb2jsonstring.append(",").append("\"").append(goal_field->name()).append("\":");
-                //     pb2jsonstring.append(tmp_string);   
-                // }
-                // else if(judge==0 && tmp_string.length()!=0)
-                // {
-                //     pb2jsonstring.append("\"").append(goal_field->name()).append("\":");
-                //     pb2jsonstring.append(tmp_string); 
-                //     judge=1;
-                // }
-                //        
 
 	         } 
             break;  
@@ -227,21 +126,6 @@ void ChooseMessageToJson(std::string& pb2jsonstring, const ::google::protobuf::M
                 tmp_string.append(reflection->GetString(msg, goal_field)).append("\"");
                 judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);
 
-                // //
-                // tmp_string.clear();
-                // tmp_string.append(reflection->GetString(msg, goal_field));
-                // if ( judge!=0 && tmp_string.length()!=0)
-                // {
-                //     pb2jsonstring.append(",").append("\"").append(goal_field->name()).append("\":").append("\"");
-                //     pb2jsonstring.append(tmp_string).append("\"");   
-                // }
-                // else if(judge==0 && tmp_string.length()!=0)
-                // {
-                //     pb2jsonstring.append("\"").append(goal_field->name()).append("\":").append("\"");
-                //     pb2jsonstring.append(tmp_string).append("\""); 
-                //     judge=1;
-                // }
-                // //
             }  
             break; 
         case FieldDescriptor::TYPE_DOUBLE:
@@ -252,28 +136,6 @@ void ChooseMessageToJson(std::string& pb2jsonstring, const ::google::protobuf::M
                 tmp_string.append(std::to_string(reflection->GetDouble(msg, goal_field)));
                 judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);
 
-                //
-                
-                // tmp_string.clear();
-                // tmp_string.append(std::to_string(reflection->GetDouble(msg, goal_field)));
-
-
-                // if ( judge!=0 && tmp_string.length()!=0)
-                // {
-
-                //     pb2jsonstring.append(",").append("\"").append(goal_field->name()).append("\":");
-                //     pb2jsonstring.append(tmp_string); 
-                //     // std::cout<<"double:"<<pb2jsonstring<<std::endl;  
-                // }
-                // else if(judge==0 && tmp_string.length()!=0)
-                // {
-                //     pb2jsonstring.append("\"").append(goal_field->name()).append("\":");
-                //     pb2jsonstring.append(tmp_string); 
-                //     judge=1;
-                // }
-
-
-                //                 
             } 
             break;
         case FieldDescriptor::TYPE_ENUM:
@@ -295,18 +157,6 @@ void ChooseMessageToJson(std::string& pb2jsonstring, const ::google::protobuf::M
 
                 judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);
 
-                //
-
-                // if ( judge!=0 && tmp_string.length()!=0)
-                // {
-                //     pb2jsonstring.append(",").append(tmp_string);
-                // }
-                // else if(judge==0 && tmp_string.length()!=0)
-                // {
-                //     pb2jsonstring.append(tmp_string);
-                //     judge = 1;
-                // }
-                //
             }
             break;
         default:  
@@ -354,20 +204,6 @@ void GetRepeatedJson(std::string& pb2jsonstring, const ::google::protobuf::Messa
                     ChooseMessageToJson(tmp_string, tmp_msg, NEED, Enum_2_Str); 
                     judge = AppendTmpString2(pb2jsonstring,tmp_string,judge);
 
-                    //
-                    // tmp_string.clear();
-                    // ChooseMessageToJson(tmp_string, tmp_msg, NEED, Enum_2_Str); 
-                    // if( judge!=0 && tmp_string.length()!=0)
-                    // {
-                    //     pb2jsonstring.append(",").append(tmp_string);
-                                              
-                    // }
-                    // else if( judge==0 && tmp_string.length()!=0)
-                    // {
-                    //      pb2jsonstring.append(tmp_string);
-                    //     judge= 1;
-                    // }
-                    //
                 }
 
             }  
@@ -378,19 +214,6 @@ void GetRepeatedJson(std::string& pb2jsonstring, const ::google::protobuf::Messa
                 tmp_string.append(std::to_string(reflection->GetInt32(msg, goal_field)));
                 judge = AppendTmpString2(pb2jsonstring,tmp_string,judge);
 
-                //
-                // tmp_string.clear();
-                // tmp_string.append(std::to_string(reflection->GetInt32(msg, goal_field)));
-                // if( judge!=0 && tmp_string.length()!=0)
-                // {
-                //     pb2jsonstring.append(",").append(tmp_string);                    
-                // }
-                // else if( judge==0 && tmp_string.length()!=0)
-                // {                    
-                //     pb2jsonstring.append(tmp_string);
-                //     judge = 1;
-                // }
-                //
 
 
         	} 
@@ -402,19 +225,6 @@ void GetRepeatedJson(std::string& pb2jsonstring, const ::google::protobuf::Messa
                 tmp_string.append(std::to_string(reflection->GetUInt32(msg, goal_field)));
                 judge = AppendTmpString2(pb2jsonstring,tmp_string,judge);
 
-                //
-                // tmp_string.clear();
-                // tmp_string.append(std::to_string(reflection->GetUInt32(msg, goal_field)));
-                // if( judge!=0 && tmp_string.length()!=0)
-                // {
-                //     pb2jsonstring.append(",").append(tmp_string);                    
-                // }
-                // else if( judge==0 && tmp_string.length()!=0)
-                // {                    
-                //     pb2jsonstring.append(tmp_string);
-                //     judge = 1;
-                // }
-                //
              } 
           
             break;  
@@ -424,19 +234,6 @@ void GetRepeatedJson(std::string& pb2jsonstring, const ::google::protobuf::Messa
                 tmp_string.append(std::to_string(reflection->GetInt64(msg, goal_field)));
                 judge = AppendTmpString2(pb2jsonstring,tmp_string,judge);
 
-                //
-                // tmp_string.clear();
-                // tmp_string.append(std::to_string(reflection->GetInt64(msg, goal_field)));
-                // if( judge!=0 && tmp_string.length()!=0)
-                // {
-                //     pb2jsonstring.append(",").append(tmp_string);                    
-                // }
-                // else if( judge==0 && tmp_string.length()!=0)
-                // {                    
-                //     pb2jsonstring.append(tmp_string);
-                //     judge = 1;
-                // }
-                // //
             }  
             break;  
         case FieldDescriptor::TYPE_UINT64:  
@@ -445,19 +242,6 @@ void GetRepeatedJson(std::string& pb2jsonstring, const ::google::protobuf::Messa
                 tmp_string.append(std::to_string(reflection->GetUInt64(msg, goal_field)));
                 judge = AppendTmpString2(pb2jsonstring,tmp_string,judge);
 
-                //
-                // tmp_string.clear();
-                // tmp_string.append(std::to_string(reflection->GetUInt64(msg, goal_field)));
-                // if( judge!=0 && tmp_string.length()!=0)
-                // {
-                //     pb2jsonstring.append(",").append(tmp_string);                    
-                // }
-                // else if( judge==0 && tmp_string.length()!=0)
-                // {                    
-                //     pb2jsonstring.append(tmp_string);
-                //     judge = 1;
-                // }
-                //
             }  
             break;  
         case FieldDescriptor::TYPE_STRING:  
@@ -467,19 +251,6 @@ void GetRepeatedJson(std::string& pb2jsonstring, const ::google::protobuf::Messa
                 tmp_string.append("\"").append(reflection->GetString(msg, goal_field)).append("\"");
                 judge = AppendTmpString2(pb2jsonstring,tmp_string,judge);
 
-                //
-                // tmp_string.clear();
-                // tmp_string.append(reflection->GetString(msg, goal_field));
-                // if( judge!=0 && tmp_string.length()!=0)
-                // {
-                //     pb2jsonstring.append(",").append(tmp_string);                    
-                // }
-                // else if( judge==0 && tmp_string.length()!=0)
-                // {                    
-                //     pb2jsonstring.append(tmp_string);
-                //     judge = 1;
-                // }
-                //
         	}
             break; 
         case FieldDescriptor::TYPE_DOUBLE:  
@@ -488,19 +259,6 @@ void GetRepeatedJson(std::string& pb2jsonstring, const ::google::protobuf::Messa
                 tmp_string.append(std::to_string(reflection->GetDouble(msg, goal_field)));
                 judge = AppendTmpString2(pb2jsonstring,tmp_string,judge);
 
-               //
-                // tmp_string.clear();
-                // tmp_string.append(std::to_string(reflection->GetDouble(msg, goal_field)));
-                // if( judge!=0 && tmp_string.length()!=0)
-                // {
-                //     pb2jsonstring.append(",").append(tmp_string);                    
-                // }
-                // else if( judge==0 && tmp_string.length()!=0)
-                // {                    
-                //     pb2jsonstring.append(tmp_string);
-                //     judge = 1;
-                // }
-                //
 	        }           
             break; 
         case FieldDescriptor::TYPE_ENUM:
@@ -520,18 +278,6 @@ void GetRepeatedJson(std::string& pb2jsonstring, const ::google::protobuf::Messa
 
                 judge = AppendTmpString2(pb2jsonstring,tmp_string,judge);
 
-                //
-                // if( judge!=0 && tmp_string.length()!=0)
-                // {
-                //     pb2jsonstring.append(",").append(tmp_string);
-                    
-                // }
-                // else if( judge==0 && tmp_string.length()!=0)
-                // {                    
-                //     pb2jsonstring.append(tmp_string);
-                //     judge = 1;
-                // }
-                //
 		    }		
             break;  
         default:  
