@@ -2,4 +2,4 @@
 共有三种实现方式，
 1.利用pb的MessageToJsonString()来进行转换
 2.利用jsoncpp来进行转换
-3.按照json格式，提取每一个field的信心进行json字符串的合成
+3.按照json格式，提取每一个field的信息进行json字符串的合成
