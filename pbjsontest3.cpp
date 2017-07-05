@@ -4,143 +4,226 @@
 #include <set>
 #include <string>
 #include "pbjsontest3.h"
-
-// #include "hxzq/pb_to_json_string.h"
   
 using namespace ::google::protobuf; 
 
-void ChooseMessageToJson(std::string& pb2jsonstring, const ::google::protobuf::Message& msg, std::set<uint>& needs, bool Enum_2_Str)  
-{  
+void ChooseSomeFieldsToJson(std::string& pb2jsonstring, const ::google::protobuf::Message& msg, std::vector<uint>& need, bool Enum_2_Str, bool Showzero)  
+{
+
     const Descriptor* descriptor = msg.GetDescriptor();  
-    const Reflection* reflection = msg.GetReflection();  
-  
+    const Reflection* reflection = msg.GetReflection(); 
+    if (need.empty())  //如果needs为空，表示需要将所有的字段转换为json
+    {    
+        NeedEmptyToJson(pb2jsonstring, msg, Enum_2_Str, Showzero);
+    }
+    else 
+    {
+        NeedNotEmptyToJson(pb2jsonstring, msg, need, Enum_2_Str, Showzero);
+    }
+}
+ 
+void NeedEmptyToJson(std::string& pb2jsonstring, const ::google::protobuf::Message& msg, bool Enum_2_Str, bool Showzero)
+{
+    const Descriptor* descriptor = msg.GetDescriptor();  
+    const Reflection* reflection = msg.GetReflection(); 
     const uint count = descriptor->field_count();
-    uint i,judge = 0;   //judge用来判断当前当前获取的field字符串是否是第一个不为空字段值，如果是，则直接append，
-                        //如果不是第一个，则先append一个“，”逗号，与前一个字段进行分割。
-
-    std::set<uint> need;
-    if (needs.empty())  //如果needs为空，表示需要将所有的字段转换为json，此时将message中所有可能的字段号insert集合need中
-    {   
-        for(i=0; i<count ; ++i)
-        {
-            need.insert(i+1);        
-        }
-    }
-    else{               //need不为空，仅需要转换几个特定的field，直接将needs复制为need
-
-        need.swap(needs);
-    }
-    i=0;
+    uint judge = 0;//ｊｕｄｇｅ用来判断是否在当前ｊｓｏｎ元素前加“，”用来分隔前后元素，如果ｊｕｄｇｅ＝＝０，则不加，如果ｊｕｇｄｇｅ＝＝１，则加“，”
     std::string tmp_string;
+    std::int32_t v32=0;
+    std::uint32_t vu32=0;
+    std::int64_t v64=0;
+    std::uint64_t vu64=0;
+    double vd=0;
+    std::string str;
     pb2jsonstring.append("{");
-    for (auto it = need.begin(); it != need.end(); ++i, ++it) 
-    {  
-        const FieldDescriptor* goal_field = descriptor->FindFieldByNumber(*it);  
-        if(nullptr==goal_field)
-            continue; 
+    for (int it = 0; it <count; ++it) 
+    {         
+        const FieldDescriptor* goal_field=descriptor->field(it);       
+        if(nullptr==goal_field)  //不存在字段
+        {
+            continue;
+        } 
+
         if (goal_field->is_repeated())  
         {  
             if (reflection->FieldSize(msg, goal_field) > 0)  
             { 
-                tmp_string.clear();
+                tmp_string="";
                 tmp_string.append("\"").append(goal_field->name()).append("\":");
                 tmp_string .append("[");
-                GetRepeatedJson(tmp_string, msg, goal_field, reflection, Enum_2_Str); 
+                GetRepeatedJson(tmp_string, msg, goal_field, reflection, Enum_2_Str,Showzero); 
                 tmp_string.append("]"); 
-                judge = AppendTmpString1(pb2jsonstring,tmp_string,judge); 
-
+                judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);  
             }
             continue;  
         }
-
-        if (!reflection->HasField(msg, goal_field))  
-        {  
-            continue;  
-        }         
-        
         switch (goal_field->type())  
         {  
         case FieldDescriptor::TYPE_MESSAGE:  
             {  
                 const Message& tmp_msg = reflection->GetMessage(msg, goal_field);  
                 if (0 != tmp_msg.ByteSize())  
-                {  
-                    tmp_string.clear();
-                    std::set<uint> NEED;
+                { 
+                    tmp_string="";
                     tmp_string.append("\"").append(goal_field->name()).append("\":");
-                    ChooseMessageToJson(tmp_string,tmp_msg, NEED, Enum_2_Str);
+                    NeedEmptyToJson(tmp_string,tmp_msg, Enum_2_Str, Showzero);
                     judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);
-
                 }  
             }  
             break;  
             
         case FieldDescriptor::TYPE_INT32: 
-			{
-                tmp_string.clear();
-                tmp_string.append("\"").append(goal_field->name()).append("\":");
-                tmp_string.append(std::to_string(reflection->GetInt32(msg, goal_field))); 
-                judge = AppendTmpString1(pb2jsonstring,tmp_string,judge); 
-
-
-
+            {
+                v32=reflection->GetInt32(msg, goal_field);
+                if(v32==0)
+                {
+                    if(Showzero)   //字段值为０，也需要进行打印
+                    {                        
+                        tmp_string="";
+                        tmp_string.append("\"").append(goal_field->name()).append("\":");
+                        tmp_string.append(std::to_string(v32)); 
+                        judge = AppendTmpString1(pb2jsonstring,tmp_string,judge); 
+                    }
+                }
+                else
+                {
+                    tmp_string="";
+                    tmp_string.append("\"").append(goal_field->name()).append("\":");
+                    tmp_string.append(std::to_string(v32));                     
+                    judge = AppendTmpString1(pb2jsonstring,tmp_string,judge); 
+                } 
             }
             break;  
 
         case FieldDescriptor::TYPE_UINT32:
-	        {  
-	            tmp_string.clear();
-	            tmp_string.append("\"").append(goal_field->name()).append("\":");
-                tmp_string.append(std::to_string(reflection->GetUInt32(msg, goal_field)));  
-                judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);  
-
-       
-	         }
+            {  
+                vu32=reflection->GetUInt32(msg, goal_field);
+                if(vu32==0)
+                {
+                    if(Showzero)
+                    {
+                        tmp_string="";
+                        tmp_string.append("\"").append(goal_field->name()).append("\":");
+                        tmp_string.append(std::to_string(vu32));  
+                        judge = AppendTmpString1(pb2jsonstring,tmp_string,judge); 
+                    }
+                }
+                else
+                {
+                    tmp_string="";
+                    tmp_string.append("\"").append(goal_field->name()).append("\":");
+                    tmp_string.append(std::to_string(vu32));
+                    judge = AppendTmpString1(pb2jsonstring,tmp_string,judge); 
+                }       
+             }
             break;  
 
         case FieldDescriptor::TYPE_INT64:  
             {  
-                tmp_string.clear();
-	            tmp_string.append("\"").append(goal_field->name()).append("\":");         
-                tmp_string.append(std::to_string(reflection->GetInt64(msg, goal_field)));
-                judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);
-
- 
-	         } 
+                v64=reflection->GetInt64(msg, goal_field);
+                if(v64==0)
+                {
+                    if(Showzero)
+                    {
+                        tmp_string="";
+                        tmp_string.append("\"").append(goal_field->name()).append("\":");         
+                        tmp_string.append(std::to_string(v64));
+                        judge = AppendTmpString1(pb2jsonstring,tmp_string,judge); 
+                    }
+                }
+                else
+                {
+                    tmp_string="";
+                    tmp_string.append("\"").append(goal_field->name()).append("\":");
+                    tmp_string.append(std::to_string(v64));         
+                    judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);  
+                } 
+            } 
             break;  
         case FieldDescriptor::TYPE_UINT64:  
              {  
-	            tmp_string.clear();                
-                tmp_string.append("\"").append(goal_field->name()).append("\":");      
-                tmp_string.append(std::to_string(reflection->GetUInt64(msg, goal_field)));
-                judge = AppendTmpString1(pb2jsonstring,tmp_string,judge); 
-
-
-	         } 
+                vu64=reflection->GetUInt64(msg, goal_field);
+                if(vu64==0)
+                {
+                    if(Showzero)
+                    {
+                        tmp_string="";                
+                        tmp_string.append("\"").append(goal_field->name()).append("\":");      
+                        tmp_string.append(std::to_string(vu64));
+                        judge = AppendTmpString1(pb2jsonstring,tmp_string,judge); 
+                    }
+                }
+                else
+                {
+                    tmp_string="";                
+                    tmp_string.append("\"").append(goal_field->name()).append("\":");      
+                    tmp_string.append(std::to_string(vu64));
+                    judge = AppendTmpString1(pb2jsonstring,tmp_string,judge); 
+                }
+             } 
             break;  
         case FieldDescriptor::TYPE_STRING:  
         case FieldDescriptor::TYPE_BYTES:  
             {  
-                tmp_string.clear();
-                tmp_string.append("\"").append(goal_field->name()).append("\":").append("\"");
-                tmp_string.append(reflection->GetString(msg, goal_field)).append("\"");
-                judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);
+                
+                str=reflection->GetString(msg, goal_field);
+                if(str.empty())
+                {
+                    if(Showzero)
+                    {
+                        tmp_string="";
+                        tmp_string.append("\"").append(goal_field->name()).append("\":");
+                        tmp_string.append("\"").append(str).append("\"");
+                        judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);
+                    }
+                }
+                else
+                {
+                    tmp_string="";
+                    tmp_string.append("\"").append(goal_field->name()).append("\":");
+                    tmp_string.append("\"").append(str).append("\"");
+                    judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);
 
+                }
             }  
             break; 
         case FieldDescriptor::TYPE_DOUBLE:
             {
-                // std::cout<<"double"<<reflection->GetDouble(msg, goal_field)<<std::endl;
-                tmp_string.clear();
+                vd=reflection->GetDouble(msg, goal_field);
+                if(vd==0)
+                {
+                    if(Showzero)
+                    {
+                        tmp_string="";
+                        tmp_string.append("\"").append(goal_field->name()).append("\":");
+                        tmp_string.append(std::to_string(vd));
+                        judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);
+                    }
+                }
+                else 
+                {
+                    tmp_string="";
+                    tmp_string.append("\"").append(goal_field->name()).append("\":");
+                    tmp_string.append(std::to_string(vd));
+                    judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);
+                }          
+            } 
+            break;
+        case FieldDescriptor::TYPE_BOOL:
+            {
+                tmp_string="";
                 tmp_string.append("\"").append(goal_field->name()).append("\":");
-                tmp_string.append(std::to_string(reflection->GetDouble(msg, goal_field)));
+                if (reflection->GetBool(msg, goal_field))
+                    tmp_string.append("true");
+                else 
+                    tmp_string.append("false");
                 judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);
-
+              
             } 
             break;
         case FieldDescriptor::TYPE_ENUM:
             {
-                tmp_string.clear();
+                tmp_string="";
                 tmp_string.append("\"").append(goal_field->name()).append("\":");
                 if (Enum_2_Str)
                 {       
@@ -148,24 +231,248 @@ void ChooseMessageToJson(std::string& pb2jsonstring, const ::google::protobuf::M
                 }
                 else 
                 {
-                	static char enumstr[8];
-                	memset(enumstr, 0, sizeof(enumstr)); 
+                    static char enumstr[8];
+                    memset(enumstr, 0, sizeof(enumstr)); 
                     snprintf(enumstr, sizeof(enumstr), "%d", reflection->GetEnum(msg,goal_field)->number());
                     tmp_string.append(enumstr);                    
-                    // pb2jsonstring.append(std::to_string(reflection->GetEnum(msg, goal_field)));
                 }
-
                 judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);
-
             }
             break;
         default:  
             break;  
-        }  
+        }
     }
     pb2jsonstring.append("}");
+}
 
-} 
+void NeedNotEmptyToJson(std::string& pb2jsonstring, const ::google::protobuf::Message& msg, std::vector<uint>& needs, bool Enum_2_Str, bool Showzero)
+{
+    const Descriptor* descriptor = msg.GetDescriptor();  
+    const Reflection* reflection = msg.GetReflection(); 
+   
+    uint judge = 0;
+    std::string tmp_string;
+    std::int32_t v32=0;
+    std::uint32_t vu32=0;
+    std::int64_t v64=0;
+    std::uint64_t vu64=0;
+    double vd=0;
+    std::string str;
+
+    pb2jsonstring.append("{");
+   
+    for (auto it=needs.begin(); it != needs.end(); ++it) 
+    {         
+        const FieldDescriptor* goal_field=descriptor->FindFieldByNumber(*it); 
+
+        if(nullptr==goal_field)  //不存在字段
+        {
+            continue;
+        } 
+
+        if (goal_field->is_repeated())  
+        {  
+            if (reflection->FieldSize(msg, goal_field) > 0)  
+            { 
+                tmp_string="";
+                tmp_string.append("\"").append(goal_field->name()).append("\":");
+                tmp_string .append("[");
+                GetRepeatedJson(tmp_string, msg, goal_field, reflection, Enum_2_Str,Showzero); 
+                tmp_string.append("]"); 
+                judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);  
+            }
+            continue;  
+        }
+        switch (goal_field->type())  
+        {  
+        case FieldDescriptor::TYPE_MESSAGE:  
+            {  
+                const Message& tmp_msg = reflection->GetMessage(msg, goal_field);  
+                if (0 != tmp_msg.ByteSize())  
+                { 
+                    tmp_string="";
+                    tmp_string.append("\"").append(goal_field->name()).append("\":");
+                    NeedEmptyToJson(tmp_string,tmp_msg, Enum_2_Str, Showzero);
+                    judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);
+                }  
+            }  
+            break;  
+            
+        case FieldDescriptor::TYPE_INT32: 
+            {
+                v32=reflection->GetInt32(msg, goal_field);
+                if(v32==0)
+                {
+                    if(Showzero)   //字段值为０，也需要进行打印
+                    {                        
+                        tmp_string="";
+                        tmp_string.append("\"").append(goal_field->name()).append("\":");
+                        tmp_string.append(std::to_string(v32)); 
+                        judge = AppendTmpString1(pb2jsonstring,tmp_string,judge); 
+                    }
+                }
+                else
+                {
+                    tmp_string="";
+                    tmp_string.append("\"").append(goal_field->name()).append("\":");
+                    tmp_string.append(std::to_string(v32));                     
+                    judge = AppendTmpString1(pb2jsonstring,tmp_string,judge); 
+                } 
+            }
+            break;  
+
+        case FieldDescriptor::TYPE_UINT32:
+            {  
+                vu32=reflection->GetUInt32(msg, goal_field);
+                if(vu32==0)
+                {
+                    if(Showzero)
+                    {
+                        tmp_string="";
+                        tmp_string.append("\"").append(goal_field->name()).append("\":");
+                        tmp_string.append(std::to_string(vu32));  
+                        judge = AppendTmpString1(pb2jsonstring,tmp_string,judge); 
+                    }
+                }
+                else
+                {
+                    tmp_string="";
+                    tmp_string.append("\"").append(goal_field->name()).append("\":");
+                    tmp_string.append(std::to_string(vu32));
+                    judge = AppendTmpString1(pb2jsonstring,tmp_string,judge); 
+                }       
+             }
+            break;  
+
+        case FieldDescriptor::TYPE_INT64:  
+            {  
+                v64=reflection->GetInt64(msg, goal_field);
+                if(v64==0)
+                {
+                    if(Showzero)
+                    {
+                        tmp_string="";
+                        tmp_string.append("\"").append(goal_field->name()).append("\":");         
+                        tmp_string.append(std::to_string(v64));
+                        judge = AppendTmpString1(pb2jsonstring,tmp_string,judge); 
+                    }
+                }
+                else
+                {
+                    tmp_string="";
+                    tmp_string.append("\"").append(goal_field->name()).append("\":");
+                    tmp_string.append(std::to_string(v64));         
+                    judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);  
+                } 
+            } 
+            break;  
+        case FieldDescriptor::TYPE_UINT64:  
+             {  
+                vu64=reflection->GetUInt64(msg, goal_field);
+                if(vu64==0)
+                {
+                    if(Showzero)
+                    {
+                        tmp_string="";                
+                        tmp_string.append("\"").append(goal_field->name()).append("\":");      
+                        tmp_string.append(std::to_string(vu64));
+                        judge = AppendTmpString1(pb2jsonstring,tmp_string,judge); 
+                    }
+                }
+                else
+                {
+                    tmp_string="";                
+                    tmp_string.append("\"").append(goal_field->name()).append("\":");      
+                    tmp_string.append(std::to_string(vu64));
+                    judge = AppendTmpString1(pb2jsonstring,tmp_string,judge); 
+                }
+             } 
+            break;  
+        case FieldDescriptor::TYPE_STRING:  
+        case FieldDescriptor::TYPE_BYTES:  
+            {  
+                
+                str=reflection->GetString(msg, goal_field);
+                if(str.empty())
+                {
+                    if(Showzero)
+                    {
+                        tmp_string="";
+                        tmp_string.append("\"").append(goal_field->name()).append("\":");
+                        tmp_string.append("\"").append(str).append("\"");
+                        judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);
+                    }
+                }
+                else
+                {
+                    tmp_string="";
+                    tmp_string.append("\"").append(goal_field->name()).append("\":");
+                    tmp_string.append("\"").append(str).append("\"");
+                    judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);
+
+                }
+            }  
+            break; 
+        case FieldDescriptor::TYPE_DOUBLE:
+            {
+                vd=reflection->GetDouble(msg, goal_field);
+                if(vd==0)
+                {
+                    if(Showzero)
+                    {
+                        tmp_string="";
+                        tmp_string.append("\"").append(goal_field->name()).append("\":");
+                        tmp_string.append(std::to_string(vd));
+                        judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);
+                    }
+                }
+                else 
+                {
+                    tmp_string="";
+                    tmp_string.append("\"").append(goal_field->name()).append("\":");
+                    tmp_string.append(std::to_string(vd));
+                    judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);
+                }          
+            } 
+            break;
+        case FieldDescriptor::TYPE_BOOL:
+            {
+                tmp_string="";
+                tmp_string.append("\"").append(goal_field->name()).append("\":");
+                if (reflection->GetBool(msg, goal_field))
+                    tmp_string.append("true");
+                else 
+                    tmp_string.append("false");
+                judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);
+              
+            } 
+            break;
+        case FieldDescriptor::TYPE_ENUM:
+            {
+                tmp_string="";
+                tmp_string.append("\"").append(goal_field->name()).append("\":");
+                if (Enum_2_Str)
+                {       
+                    tmp_string.append("\"").append(reflection->GetEnum(msg,goal_field)->name()).append("\"");
+                }
+                else 
+                {
+                    static char enumstr[8];
+                    memset(enumstr, 0, sizeof(enumstr)); 
+                    snprintf(enumstr, sizeof(enumstr), "%d", reflection->GetEnum(msg,goal_field)->number());
+                    tmp_string.append(enumstr);                    
+                }
+                judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);
+            }
+            break;
+        default:  
+            break;  
+        }
+    }
+    pb2jsonstring.append("}");
+}
+
 int AppendTmpString1(std::string &pb2jsonstring,std::string &tmp_string, int judge)
 {
     if ( judge!=0 && tmp_string.length()!=0)
@@ -181,18 +488,18 @@ int AppendTmpString1(std::string &pb2jsonstring,std::string &tmp_string, int jud
     return judge;
 } 
   
-void GetRepeatedJson(std::string& pb2jsonstring, const ::google::protobuf::Message& msg, const google::protobuf::FieldDescriptor *goal_field, const ::google::protobuf::Reflection *reflection, bool Enum_2_Str)  
-{  
-   std::set<uint> NEED;
-    if (NULL == goal_field || NULL == reflection)  
-    {  
-        ChooseMessageToJson(pb2jsonstring, msg, NEED, Enum_2_Str);        
-    }
+void GetRepeatedJson(std::string& pb2jsonstring, const ::google::protobuf::Message& msg, const google::protobuf::FieldDescriptor *goal_field, const ::google::protobuf::Reflection *reflection, bool Enum_2_Str,bool Showzero)  
+{     
     std::string tmp_string;
     int judge=0;
+    std::int32_t v32=0;
+    std::uint32_t vu32=0;
+    std::int64_t v64=0;
+    std::uint64_t vu64=0;
+    double vd=0;
+    std::string str;
     for (int i = 0; i < reflection->FieldSize(msg, goal_field); ++i)  
     {      
-        tmp_string.clear();
         switch (goal_field->type())                 
         {  
         case FieldDescriptor::TYPE_MESSAGE:  
@@ -200,92 +507,170 @@ void GetRepeatedJson(std::string& pb2jsonstring, const ::google::protobuf::Messa
                 const Message& tmp_msg = reflection->GetRepeatedMessage(msg, goal_field, i);
                 if (0 != tmp_msg.ByteSize())  
                 {                    
-                    tmp_string.clear();
-                    ChooseMessageToJson(tmp_string, tmp_msg, NEED, Enum_2_Str); 
+                    tmp_string="";
+                    NeedEmptyToJson(tmp_string, tmp_msg, Enum_2_Str,Showzero); 
                     judge = AppendTmpString2(pb2jsonstring,tmp_string,judge);
-
                 }
-
             }  
             break;  
         case FieldDescriptor::TYPE_INT32: 
-        	{        		
-                tmp_string.clear();
-                tmp_string.append(std::to_string(reflection->GetInt32(msg, goal_field)));
-                judge = AppendTmpString2(pb2jsonstring,tmp_string,judge);
-
-
-
-        	} 
+            {               
+                v32=reflection->GetRepeatedInt32(msg, goal_field,i);
+                if(v32==0)
+                {
+                    if(Showzero)
+                    {                        
+                        tmp_string="";
+                        tmp_string.append(std::to_string(v32)); 
+                        judge = AppendTmpString1(pb2jsonstring,tmp_string,judge); 
+                    }
+                }
+                else
+                {
+                    tmp_string="";
+                    tmp_string.append(std::to_string(v32));            
+                    judge = AppendTmpString1(pb2jsonstring,tmp_string,judge); 
+                } 
+            } 
             
             break;  
         case FieldDescriptor::TYPE_UINT32:
-    		{               
-                tmp_string.clear();
-                tmp_string.append(std::to_string(reflection->GetUInt32(msg, goal_field)));
-                judge = AppendTmpString2(pb2jsonstring,tmp_string,judge);
-
-             } 
-          
+            {               
+                vu32=reflection->GetRepeatedUInt32(msg, goal_field,i);
+                if(vu32==0)
+                {
+                    if(Showzero)
+                    {
+                        tmp_string="";
+                        tmp_string.append(std::to_string(vu32));  
+                        judge = AppendTmpString1(pb2jsonstring,tmp_string,judge); 
+                    }
+                }
+                else
+                {
+                    tmp_string="";
+                    tmp_string.append(std::to_string(vu32)); 
+                    judge = AppendTmpString1(pb2jsonstring,tmp_string,judge); 
+                }       
+             }          
             break;  
         case FieldDescriptor::TYPE_INT64:  
             {  
-                tmp_string.clear();
-                tmp_string.append(std::to_string(reflection->GetInt64(msg, goal_field)));
-                judge = AppendTmpString2(pb2jsonstring,tmp_string,judge);
-
+                v64=reflection->GetRepeatedInt64(msg, goal_field,i);
+                if(v64==0)
+                {
+                    if(Showzero)
+                    {
+                        tmp_string="";      
+                        tmp_string.append(std::to_string(v64));
+                        judge = AppendTmpString1(pb2jsonstring,tmp_string,judge); 
+                    }
+                }
+                else
+                {
+                    tmp_string="";
+                    tmp_string.append(std::to_string(v64));         
+                    judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);  
+                }
             }  
             break;  
         case FieldDescriptor::TYPE_UINT64:  
             {  
-                tmp_string.clear();
-                tmp_string.append(std::to_string(reflection->GetUInt64(msg, goal_field)));
-                judge = AppendTmpString2(pb2jsonstring,tmp_string,judge);
+                vu64=reflection->GetRepeatedUInt64(msg, goal_field,i);
+                if(vu64==0)
+                {
+                    if(Showzero)
+                    {
+                        tmp_string="";                      
+                        tmp_string.append(std::to_string(vu64));
+                        judge = AppendTmpString1(pb2jsonstring,tmp_string,judge); 
+                    }
+                }
+                else
+                {
+                    tmp_string="";                    
+                    tmp_string.append(std::to_string(vu64));
+                    judge = AppendTmpString1(pb2jsonstring,tmp_string,judge); 
+                }
 
             }  
             break;  
         case FieldDescriptor::TYPE_STRING:  
         case FieldDescriptor::TYPE_BYTES: 
-        	{
-		        tmp_string.clear();
-                tmp_string.append("\"").append(reflection->GetString(msg, goal_field)).append("\"");
-                judge = AppendTmpString2(pb2jsonstring,tmp_string,judge);
+            {
+                str="";
+                str=reflection->GetRepeatedString(msg, goal_field,i);
+                if(str.empty())
+                {
+                    if(Showzero)
+                    {
+                        tmp_string="";
+                        tmp_string.append("\"").append(str).append("\"");
+                        judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);
+                    }
+                }
+                else
+                {
+                    tmp_string="";
+                    tmp_string.append("\"").append(str).append("\"");
+                    judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);
 
-        	}
+                }
+            }
             break; 
         case FieldDescriptor::TYPE_DOUBLE:  
-	        {
-                tmp_string.clear();
-                tmp_string.append(std::to_string(reflection->GetDouble(msg, goal_field)));
-                judge = AppendTmpString2(pb2jsonstring,tmp_string,judge);
+            {
+                vd=reflection->GetRepeatedDouble(msg, goal_field,i);
+                if(vd==0)
+                {
+                    if(Showzero)
+                    {
+                        tmp_string="";
+                        tmp_string.append(std::to_string(vd));
+                        judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);
+                    }
+                }
+                else 
+                {
+                    tmp_string="";
+                    tmp_string.append(std::to_string(vd));
+                    judge = AppendTmpString1(pb2jsonstring,tmp_string,judge);
+                }
 
-	        }           
+            }           
             break; 
+         case FieldDescriptor::TYPE_BOOL:  
+        {
+            tmp_string="";
+            if(reflection->GetRepeatedBool(msg, goal_field,i))
+                tmp_string.append("true");
+            else
+                tmp_string.append("false");
+            judge = AppendTmpString2(pb2jsonstring,tmp_string,judge);
+
+        }           
+        break; 
         case FieldDescriptor::TYPE_ENUM:
-		    {
-		       tmp_string.clear();
+            {
+               tmp_string="";
                if (Enum_2_Str)
-		            {		                
-                        tmp_string.append("\"").append(reflection->GetEnum(msg,goal_field)->name()).append("\"");                
-		            }
-		        else 
-		            {
-		            	static char enumstr[8];
-		            	memset(enumstr, 0, sizeof(enumstr)); 
-		                snprintf(enumstr, sizeof(enumstr), "%d", reflection->GetEnum(msg,goal_field)->number());
-		                tmp_string.append(enumstr);
-		            }
-
+                    {                       
+                        tmp_string.append("\"").append(reflection->GetRepeatedEnum(msg,goal_field,i)->name()).append("\"");                
+                    }
+                else 
+                    {
+                        static char enumstr[8];
+                        memset(enumstr, 0, sizeof(enumstr)); 
+                        snprintf(enumstr, sizeof(enumstr), "%d", reflection->GetRepeatedEnum(msg,goal_field,i)->number());
+                        tmp_string.append(enumstr);
+                    }
                 judge = AppendTmpString2(pb2jsonstring,tmp_string,judge);
-
-		    }		
+            }       
             break;  
         default:  
             break;  
-        }  
-        
-    }
-    
+        }        
+    }    
 }  
 int AppendTmpString2(std::string &pb2jsonstring,std::string &tmp_string, int judge)
 {
@@ -300,6 +685,5 @@ int AppendTmpString2(std::string &pb2jsonstring,std::string &tmp_string, int jud
         return 1;
     }
     return judge;
-
 }
 
